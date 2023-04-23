@@ -1,4 +1,5 @@
 # mood
+[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-informational)](COPYRIGHT.md)
 
 `mood` is a minimal journaling CLI, inspired by the Android app [Pixels, by Teo Vogel](https://play.google.com/store/apps/details?id=ar.teovogel.yip).
 
