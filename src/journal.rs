@@ -1,6 +1,7 @@
 use std::{error::Error, fs::File};
 
 use chrono::NaiveDate;
+use mood::MoodConfig;
 use ron::{de::from_reader, ser::to_writer};
 use serde::{Deserialize, Serialize};
 
@@ -11,13 +12,21 @@ pub enum JournalError {
     InvalidDateRange,
 }
 
-pub fn save_journal(journal: &Journal) -> Result<(), Box<dyn Error>> {
-    let file = File::create("journal.ron")?;
+pub fn save_journal(config: &MoodConfig, journal: &Journal) -> Result<(), Box<dyn Error>> {
+    let file = File::create(&config.journal_dir)?;
     to_writer(file, journal)?;
     Ok(())
 }
-pub fn load_journal() -> Result<Journal, Box<dyn Error>> {
-    let file = File::open("journal.ron")?;
+pub fn load_journal(config: &MoodConfig) -> Result<Journal, Box<dyn Error>> {
+    let file = match File::open(&config.journal_dir) {
+        Ok(file) => file,
+        Err(_) => {
+            let dirs = config.journal_dir.parent().expect("pop file");
+
+            std::fs::create_dir_all(dirs)?;
+            File::create(&config.journal_dir)?
+        }
+    };
     let journal = from_reader(file)?;
     Ok(journal)
 }

@@ -10,6 +10,7 @@ authors = ["Andreas N. <nilsiker94@gmail.com>"]
 clap = { version = "4.2.4", features = ["derive"] }
 chrono = { version = "0.4.24", features = ["serde"] }
 serde = { version = "1.0.160", features = ["derive"] }
-bincode = "1.3.3"
 ron = "0.8.0"
+bincode = "1.3.3"
+directories = "5.0.0"
 rand = "0.8.5"

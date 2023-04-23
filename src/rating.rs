@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, ValueEnum)]
 pub enum Rating {
-    Terrible,
+    Awful,
     Bad,
     Neutral,
     Good,
@@ -15,7 +15,7 @@ pub enum Rating {
 impl From<Rating> for u8 {
     fn from(value: Rating) -> Self {
         match value {
-            Rating::Terrible => 1,
+            Rating::Awful => 1,
             Rating::Bad => 2,
             Rating::Neutral => 3,
             Rating::Good => 4,
@@ -27,7 +27,7 @@ impl From<Rating> for u8 {
 impl Distribution<Rating> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Rating {
         match rng.gen_range(0..=4) {
-            0 => Rating::Terrible,
+            0 => Rating::Awful,
             1 => Rating::Bad,
             2 => Rating::Neutral,
             3 => Rating::Good,

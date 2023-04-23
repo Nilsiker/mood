@@ -1,6 +1,13 @@
+use std::{
+    fs::{File, OpenOptions},
+    path::PathBuf,
+    str::FromStr,
+};
+
 use chrono::{Days, NaiveDate};
 use clap::Subcommand;
-use mood::today;
+use mood::{get_config_file_path, today, MoodConfig};
+use ron::ser::to_writer;
 
 use crate::{
     journal::{save_journal, Journal, JournalEntry},
@@ -39,12 +46,16 @@ pub enum Commands {
         #[clap(value_parser)]
         to: Option<NaiveDate>,
     },
+    Config {
+        #[arg(short)]
+        file: String,
+    },
 }
 
-pub fn add(journal: &mut Journal, mood: &Rating, note: &Option<String>) {
+pub fn add(config: &MoodConfig, journal: &mut Journal, mood: &Rating, note: &Option<String>) {
     let entry = JournalEntry::new(today(), mood.clone(), note.to_owned().unwrap_or_default());
     journal.add_entry(entry);
-    save_journal(journal).expect("save file should always succeed");
+    save_journal(config, journal).expect("save file should always succeed");
 }
 
 pub fn get(journal: &Journal, date: &Option<NaiveDate>) {
@@ -89,4 +100,22 @@ pub fn list(journal: &Journal, from: &Option<NaiveDate>, to: &Option<NaiveDate>)
         println!("[{}]\t{:?}\t{}", entry.date, entry.mood, entry.note)
     }
     println!();
+}
+
+pub fn config(config: &mut MoodConfig, file: &String) {
+    let file = if let Ok(file) = PathBuf::from_str(&file.replace('\n', "")) {
+        file
+    } else {
+        println!(
+            "Expected a valid journal directory path. Keeping old path {:?}",
+            config.journal_dir
+        );
+        return;
+    };
+
+    config.journal_dir = file.to_owned();
+
+    let file =
+        File::create(get_config_file_path()).expect("config file created at first run of cli");
+    to_writer(file, &config).expect("able towrite to config file");
 }
