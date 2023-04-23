@@ -25,7 +25,13 @@ impl Default for MoodConfig {
             Ok(file) => file,
             Err(_) => {
                 println!("No existing config file found, creating one...");
-                std::fs::create_dir(config_dir).expect("able to create mood config folder");
+                match std::fs::create_dir(config_dir) {
+                    Ok(_) => (),
+                    Err(e) => match e.kind() {
+                        std::io::ErrorKind::AlreadyExists => (),
+                        _ => panic!("Error occured when creating config folder: {e}"),
+                    },
+                }
                 File::create(config_file_path).expect("able to create config file.")
             }
         };
@@ -33,7 +39,7 @@ impl Default for MoodConfig {
         match from_reader(&file) {
             Ok(config) => config,
             Err(_) => {
-                let journal_dir = get_default_journal_dir();
+                let journal_dir = get_default_journal_dir().join(DEFAULT_JOURNAL_NAME);
                 let config = MoodConfig { journal_dir };
 
                 to_writer(&file, &config).expect("save default config to file.");
