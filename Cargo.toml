@@ -4,6 +4,12 @@ version = "0.1.0"
 edition = "2021"
 description = "MOOD: A minimal journaling CLI for logging your everyday mood."
 authors = ["Andreas Nilsson <nilsiker94@gmail.com>"]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Nilsiker/mood"
+keywords = ["cli", "journaling"]
+categories = ["command-line-utilities"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
