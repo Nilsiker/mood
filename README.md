@@ -13,7 +13,9 @@ In order to be as lean and unintrusive as possible, `mood` only provides one gen
 * Stores a journal file locally in a human-readable RON format
 
 ## Installing
-You can either build this program from source, or install it using `cargo install mood`.
+You can either build this program from source, or install it using 
+
+`cargo install mood`
 
 ## Usage
 
