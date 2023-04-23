@@ -172,23 +172,23 @@ mod tests {
         let day_after_tomorrow = today().checked_add_days(Days::new(2)).unwrap();
 
         let yesterday_entry = JournalEntry {
-            date: yesterday.clone(),
+            date: yesterday,
             mood: Rating::Bad,
             note: String::from("Yesterday"),
         };
         let now_entry = JournalEntry {
-            date: now.clone(),
+            date: now,
             mood: Rating::Neutral,
             note: String::from("Today"),
         };
         let day_after_tomorrow_entry = JournalEntry {
-            date: day_after_tomorrow.clone(),
+            date: day_after_tomorrow,
             mood: Rating::Great,
             note: String::from("Day after tomorrow"),
         };
 
         // Add in "wrong order"
-        journal.add_entry(day_after_tomorrow_entry.clone());
+        journal.add_entry(day_after_tomorrow_entry);
         journal.add_entry(now_entry.clone());
         journal.add_entry(yesterday_entry.clone());
 
@@ -213,25 +213,25 @@ mod tests {
         let day_after_tomorrow = today().checked_add_days(Days::new(2)).unwrap();
 
         let yesterday_entry = JournalEntry {
-            date: yesterday.clone(),
+            date: yesterday,
             mood: Rating::Bad,
             note: String::from("Yesterday"),
         };
         let now_entry = JournalEntry {
-            date: now.clone(),
+            date: now,
             mood: Rating::Neutral,
             note: String::from("Today"),
         };
         let day_after_tomorrow_entry = JournalEntry {
-            date: day_after_tomorrow.clone(),
+            date: day_after_tomorrow,
             mood: Rating::Great,
             note: String::from("Day after tomorrow"),
         };
 
         // Add in "wrong order"
-        journal.add_entry(day_after_tomorrow_entry.clone());
-        journal.add_entry(now_entry.clone());
-        journal.add_entry(yesterday_entry.clone());
+        journal.add_entry(day_after_tomorrow_entry);
+        journal.add_entry(now_entry);
+        journal.add_entry(yesterday_entry);
 
         assert!(journal.get_entries(&tomorrow, &yesterday).is_err());
     }

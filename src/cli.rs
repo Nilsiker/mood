@@ -1,5 +1,5 @@
 use std::{
-    fs::{File, OpenOptions},
+    fs::{File},
     path::PathBuf,
     str::FromStr,
 };
@@ -46,7 +46,9 @@ pub enum Commands {
         #[clap(value_parser)]
         to: Option<NaiveDate>,
     },
+    /// Set program options
     Config {
+        /// The absolute path to the file (not just directory) that stores the journal data. If it does not exist, mood will create it.
         #[arg(short)]
         file: String,
     },
@@ -102,7 +104,7 @@ pub fn list(journal: &Journal, from: &Option<NaiveDate>, to: &Option<NaiveDate>)
     println!();
 }
 
-pub fn config(config: &mut MoodConfig, file: &String) {
+pub fn config(config: &mut MoodConfig, file: &str) {
     let file = if let Ok(file) = PathBuf::from_str(&file.replace('\n', "")) {
         file
     } else {
@@ -113,7 +115,7 @@ pub fn config(config: &mut MoodConfig, file: &String) {
         return;
     };
 
-    config.journal_dir = file.to_owned();
+    config.journal_dir = file;
 
     let file =
         File::create(get_config_file_path()).expect("config file created at first run of cli");
