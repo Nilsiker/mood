@@ -1,34 +1,19 @@
-use std::{error::Error, fs::File};
+use std::{
+    error::Error,
+    fs::{File, OpenOptions},
+};
 
 use chrono::NaiveDate;
-use mood::MoodConfig;
 use ron::{de::from_reader, ser::to_writer};
 use serde::{Deserialize, Serialize};
 
-use crate::rating::Rating;
+use crate::{config::MoodConfig, error::MoodError, rating::Rating};
+
+pub const DEFAULT_JOURNAL_NAME: &str = "journal.ron";
 
 #[derive(Debug)]
 pub enum JournalError {
     InvalidDateRange,
-}
-
-pub fn save_journal(config: &MoodConfig, journal: &Journal) -> Result<(), Box<dyn Error>> {
-    let file = File::create(&config.journal_dir)?;
-    to_writer(file, journal)?;
-    Ok(())
-}
-pub fn load_journal(config: &MoodConfig) -> Result<Journal, Box<dyn Error>> {
-    let file = match File::open(&config.journal_dir) {
-        Ok(file) => file,
-        Err(_) => {
-            let dirs = config.journal_dir.parent().expect("pop file");
-
-            std::fs::create_dir_all(dirs)?;
-            File::create(&config.journal_dir)?
-        }
-    };
-    let journal = from_reader(file)?;
-    Ok(journal)
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -37,8 +22,54 @@ pub struct Journal {
 }
 
 impl Journal {
+    pub fn init(MoodConfig { journal_path }: &MoodConfig) -> Result<Self, Box<dyn Error>> {
+        if !journal_path
+            .parent()
+            .expect("journal path has a parent folder")
+            .exists()
+        {
+            std::fs::create_dir_all(
+                journal_path
+                    .parent()
+                    .expect("journal path has a parent folder"),
+            )?;
+        }
+
+        let journal = match journal_path.is_file() {
+            true => {
+                let file = File::open(journal_path)?;
+                let journal: Journal = from_reader(file).map_err(|e| {
+                    MoodError::JournalFileError(format!("Read from file. I/O error: {e:?}"))
+                })?;
+
+                journal
+            }
+            false => {
+                let journal = Journal::default();
+                File::create(journal_path)?;
+                journal
+            }
+        };
+        Ok(journal)
+    }
+
+    pub fn save(&self, MoodConfig { journal_path }: &MoodConfig) -> Result<(), Box<dyn Error>> {
+        let file = match journal_path.is_file() {
+            true => OpenOptions::new().write(true).truncate(true).open(journal_path)?,
+            false => File::create(journal_path)?,
+        };
+
+        to_writer(file, self)
+            .map_err(|e| MoodError::JournalFileError(format!("Write to file. I/O error: {e:?}")))?;
+        Ok(())
+    }
+
     pub fn len(&self) -> usize {
         self.data.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     pub fn add_entry(&mut self, entry: JournalEntry) -> Option<JournalEntry> {
@@ -66,7 +97,7 @@ impl Journal {
         from: &NaiveDate,
         to: &NaiveDate,
     ) -> Result<&[JournalEntry], JournalError> {
-        if self.len() == 0 {
+        if self.is_empty() {
             return Ok(&[]);
         }
         let from_index = match self.data.binary_search_by(|probe| probe.date.cmp(from)) {
@@ -108,9 +139,8 @@ impl From<(NaiveDate, Rating, String)> for JournalEntry {
 #[cfg(test)]
 mod tests {
     use chrono::Days;
-    use mood::today;
 
-    use crate::{journal::Journal, rating::Rating};
+    use crate::{helpers::today, journal::Journal, rating::Rating};
 
     use super::JournalEntry;
 
