@@ -8,7 +8,7 @@ In order to be as lean and unintrusive as possible, `mood` only provides one gen
 ## Features
 
 * Add minimal journal entries through CLI commands
-    * Rate the day on a 1-5 scale (Terrible, Bad, Neutral, Good, Great)
+    * Rate the day on a 1-5 scale (Awful, Bad, Neutral, Good, Great)
     * Add an optional note to help remember what made the day what it was.
 * Get entries specific to a date, or certain date ranges
 * Stores a journal file locally in a human-readable RON format
@@ -39,5 +39,3 @@ To add a daily journal, use the command below. If you wish to update the entry, 
 * Optional colorization depending on rating
 * Custom mood ratings
 * Structured notes option (customizable emotions and/or activity names)
-* More ergonomic notes section using an indefinite amount of argument values, instead of text content wrapped in citation marks.
-* Customizable journal file path.
