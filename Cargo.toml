@@ -1,6 +1,6 @@
 [package]
 name = "mood"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "MOOD: A minimal journaling CLI for logging your everyday mood."
 authors = ["Andreas Nilsson <nilsiker94@gmail.com>"]
