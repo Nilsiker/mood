@@ -55,7 +55,10 @@ impl Journal {
 
     pub fn save(&self, MoodConfig { journal_path }: &MoodConfig) -> Result<(), Box<dyn Error>> {
         let file = match journal_path.is_file() {
-            true => OpenOptions::new().write(true).truncate(true).open(journal_path)?,
+            true => OpenOptions::new()
+                .write(true)
+                .truncate(true)
+                .open(journal_path)?,
             false => File::create(journal_path)?,
         };
 
@@ -96,24 +99,21 @@ impl Journal {
         &self,
         from: &NaiveDate,
         to: &NaiveDate,
-    ) -> Result<&[JournalEntry], JournalError> {
+    ) -> Result<Vec<&JournalEntry>, JournalError> {
         if self.is_empty() {
-            return Ok(&[]);
+            return Ok(vec![]);
         }
-        let from_index = match self.data.binary_search_by(|probe| probe.date.cmp(from)) {
-            Ok(v) => v,
-            Err(v) => v,
-        };
-
-        let to_index = match self.data.binary_search_by(|probe| probe.date.cmp(to)) {
-            Ok(v) => v,
-            Err(v) => v.saturating_sub(1),
-        };
-
-        match to_index < from_index {
-            true => Err(JournalError::InvalidDateRange),
-            false => Ok(&self.data[from_index..=to_index]),
+        if to < from {
+            return Err(JournalError::InvalidDateRange);
         }
+
+        let entries = self
+            .data
+            .iter()
+            .filter(|entry| entry.date >= *from && entry.date <= *to)
+            .collect::<Vec<&JournalEntry>>();
+
+        Ok(entries)
     }
 }
 
@@ -222,15 +222,15 @@ mod tests {
         journal.add_entry(now_entry.clone());
         journal.add_entry(yesterday_entry.clone());
 
-        let slice = journal.get_entries(&yesterday, &tomorrow).unwrap();
+        let entries = &journal.get_entries(&yesterday, &tomorrow).unwrap();
 
         fn do_vecs_match<T: PartialEq>(a: &Vec<T>, b: &Vec<T>) -> bool {
             let matching = a.iter().zip(b.iter()).filter(|&(a, b)| a == b).count();
             matching == a.len() && matching == b.len()
         }
 
-        let to_cmp = &vec![yesterday_entry, now_entry];
-        assert!(do_vecs_match(&slice.to_vec(), to_cmp));
+        let to_cmp = &vec![&yesterday_entry, &now_entry];
+        assert!(do_vecs_match(entries, to_cmp));
     }
 
     #[test]
